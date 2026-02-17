@@ -1,25 +1,37 @@
-# Ahmad Farras Syafri's Project
+# Ahmad Farras Syafrin - Portfolio Website
 
-Welcome to the repository for Ahmad Farras Syafri's personal project.
+A modern portfolio website built with SvelteKit, TypeScript, and Tailwind CSS.
 
-## Project Description
+## Tech Stack
 
-This project is a personal website hosted on GitHub Pages. It showcases various aspects of my work and interests.
+- SvelteKit - Modern web framework
+- TypeScript - Type-safe JavaScript
+- Tailwind CSS - Utility-first CSS framework
+- Flowbite Svelte - UI component library
 
-## Disclaimer
+## Development
 
-This website was created using a template from [BootstrapMade](https://bootstrapmade.com/). BootstrapMade provides free and premium HTML templates that are easy to customize and use.
+### Installation
+```bash
+npm install
+```
 
-## Features
+### Development Server
+```bash
+npm run dev
+```
 
-- Personal portfolio
-- Contact information
+### Build for Production
+```bash
+npm run build
+```
 
-## Usage
+## Deployment
 
-Feel free to explore the website and learn more about my work. You can also contact me through the provided contact information.
+The site is deployed to GitHub Pages. The build output is in the `build/` directory.
 
+## Author
 
-## Contact
-
-For any inquiries, please reach out to me at [ahmadfarrassyafrin@gmail.com](mailto:ahmadfarrassyafrin@gmail.com).
+Ahmad Farras Syafrin
+- GitHub: [@ahmadfarras](https://github.com/ahmadfarras)
+- LinkedIn: [ahmad-farras-syafrin](https://www.linkedin.com/in/ahmad-farras-syafrin/)
