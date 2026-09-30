@@ -121,6 +121,7 @@
   name="Snake"
   instructions="Arrow keys or WASD steer, P pauses."
   {status}
+  score={game.score}
   boardRatio={1}
   overTitle={game.hasWon ? "YOU WIN!" : "GAME OVER"}
   helpLines={["ARROWS STEER", "WASD STEER", "P PAUSE"]}

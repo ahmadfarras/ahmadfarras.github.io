@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { fade } from "svelte/transition";
+  import { track } from "$lib/analytics";
   import { browserStorage } from "$lib/browserStorage";
   import AppWindow from "./AppWindow.svelte";
   import BootScreen from "./BootScreen.svelte";
@@ -45,10 +46,17 @@
   $: activeId = activeWindowId($desktop);
   $: activeTitle = activeId ? (windowAppsById.get(activeId)?.title ?? null) : null;
 
-  function openApp(id: string) {
+  function openWindow(id: string) {
     const app = windowAppsById.get(id);
     if (!app) return;
     desktop.open(id, initialRect(app.size, $desktop.windows.length, workArea));
+  }
+
+  /** Opened by the visitor (Dock, folders, buttons): also counted in analytics when it's new. */
+  function openApp(id: string) {
+    const isAlreadyOpen = $desktop.windows.some((win) => win.id === id);
+    openWindow(id);
+    if (!isAlreadyOpen) track("open-app", { app: id });
   }
 
   /** Right-click on the wallpaper; windows and the Dock keep the browser's own menu (copy text, open links). */
@@ -67,7 +75,7 @@
   onMount(() => {
     wallpaper.load();
     if (bootPhase === "done") {
-      openApp(START_APP);
+      openWindow(START_APP);
       return;
     }
     // performance.now() counts from the start of navigation, so a slow load skips the minimum.
@@ -77,7 +85,7 @@
       finishTimer = setTimeout(() => {
         bootPhase = "done";
         markBooted();
-        openApp(START_APP);
+        openWindow(START_APP);
       }, BOOT_FINISH_MS);
     }, remainingBootMs(performance.now()));
     return () => {

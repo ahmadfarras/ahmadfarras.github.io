@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import { track } from "$lib/analytics";
   import type { GameStatus } from "./types";
 
   /**
@@ -11,6 +12,8 @@
   /** Read by screen readers when the game area is focused. */
   export let instructions: string;
   export let status: GameStatus;
+  /** Reported with the game-over analytics event. */
+  export let score: number;
   /** Board width / height, e.g. 0.5 for Tetris' 10x20 well. */
   export let boardRatio: number;
   export let overTitle = "GAME OVER";
@@ -21,11 +24,18 @@
   export let onKey: (key: string) => boolean;
 
   let root: HTMLElement;
+  let previousStatus = status;
+
+  $: if (status !== previousStatus) {
+    if (status === "over") track("game-over", { game: name, score });
+    previousStatus = status;
+  }
 
   $: title = status === "paused" ? "PAUSED" : status === "over" ? overTitle : name.toUpperCase();
   $: buttonLabel = status === "paused" ? "RESUME" : status === "over" ? "PLAY AGAIN" : "START";
 
   function start() {
+    if (status !== "paused") track("game-start", { game: name });
     onStart();
     root.focus();
   }
