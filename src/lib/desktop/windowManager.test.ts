@@ -7,6 +7,7 @@ import {
   closeWindow,
   createDesktopStore,
   displayRect,
+  fitInside,
   emptyDesktop,
   focusWindow,
   initialRect,
@@ -180,6 +181,40 @@ describe("minimizeTransform", () => {
 
   it("handles targets up and to the left", () => {
     expect(minimizeTransform(rect, { x: 10, y: 20 })).toBe("translate(-200px, -150px) scale(0.1)");
+  });
+});
+
+describe("fitInside", () => {
+  const menu = { width: 200, height: 100 };
+  const tiny = { width: 100, height: 60 };
+  it.each([
+    { name: "room to spare", point: { x: 300, y: 200 }, bounds: desktop, want: { x: 300, y: 200 } },
+    {
+      name: "near the right edge",
+      point: { x: 1250, y: 200 },
+      bounds: desktop,
+      want: { x: 1072, y: 200 }
+    },
+    {
+      name: "near the bottom edge",
+      point: { x: 300, y: 790 },
+      bounds: desktop,
+      want: { x: 300, y: 692 }
+    },
+    {
+      name: "past the top-left corner",
+      point: { x: -20, y: -5 },
+      bounds: desktop,
+      want: { x: 8, y: 8 }
+    },
+    {
+      name: "bounds smaller than the menu",
+      point: { x: 50, y: 50 },
+      bounds: tiny,
+      want: { x: 8, y: 8 }
+    }
+  ])("$name", ({ point, bounds, want }) => {
+    expect(fitInside(point, menu, bounds)).toEqual(want);
   });
 });
 

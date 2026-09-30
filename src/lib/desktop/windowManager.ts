@@ -158,6 +158,18 @@ export function minimizeTransform(rect: Rect, target: Point): string {
   return `translate(${dx}px, ${dy}px) scale(${MINIMIZED_SCALE})`;
 }
 
+const MENU_EDGE_MARGIN = 8;
+
+/** Moves a popup (e.g. the context menu) so it opens at `point` but never spills off the desktop. */
+export function fitInside(point: Point, size: Size, bounds: Size): Point {
+  const maxX = bounds.width - size.width - MENU_EDGE_MARGIN;
+  const maxY = bounds.height - size.height - MENU_EDGE_MARGIN;
+  return {
+    x: Math.max(MENU_EDGE_MARGIN, Math.min(point.x, maxX)),
+    y: Math.max(MENU_EDGE_MARGIN, Math.min(point.y, maxY))
+  };
+}
+
 export function createDesktopStore(initial: DesktopState = emptyDesktop()) {
   const { subscribe, update } = writable(initial);
   return {

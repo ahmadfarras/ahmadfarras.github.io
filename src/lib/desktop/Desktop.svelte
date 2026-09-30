@@ -1,17 +1,29 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import { fade } from "svelte/transition";
   import AppWindow from "./AppWindow.svelte";
+  import ContextMenu from "./ContextMenu.svelte";
   import Taskbar from "./Taskbar.svelte";
   import { apps, windowAppsById } from "./apps";
-  import { setOpenApp } from "./context";
-  import { activeWindowId, createDesktopStore, initialRect } from "./windowManager";
+  import { setOpenApp, setWallpaperStore } from "./context";
+  import { createWallpaperStore } from "./wallpapers";
+  import {
+    activeWindowId,
+    createDesktopStore,
+    initialRect,
+    type Point
+  } from "./windowManager";
 
   const COMPACT_BREAKPOINT = 768;
   const START_APP = "about";
 
+  const WALLPAPER_FADE_MS = 400;
+
   const desktop = createDesktopStore();
+  const wallpaper = createWallpaperStore(browserStorage());
   let width = 0;
   let height = 0;
+  let contextMenuAt: Point | null = null;
 
   $: desktopSize = { width, height };
   $: isCompact = width < COMPACT_BREAKPOINT;
@@ -23,8 +35,32 @@
     desktop.open(id, initialRect(app.size, $desktop.windows.length, desktopSize));
   }
 
+  /** Right-click on the wallpaper or icons; windows keep the browser's own menu so text can be copied. */
+  function openContextMenu(event: MouseEvent) {
+    if ((event.target as HTMLElement).closest('[role="dialog"]')) return;
+    event.preventDefault();
+    const bounds = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    contextMenuAt = { x: event.clientX - bounds.left, y: event.clientY - bounds.top };
+  }
+
+  /** localStorage can throw on access when site data is blocked; treat that as "no storage". */
+  function browserStorage(): Storage | null {
+    try {
+      return typeof localStorage === "undefined" ? null : localStorage;
+    } catch {
+      return null;
+    }
+  }
+
+  const prefersReducedMotion = () =>
+    typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+
   setOpenApp(openApp);
-  onMount(() => openApp(START_APP));
+  setWallpaperStore(wallpaper);
+  onMount(() => {
+    wallpaper.load();
+    openApp(START_APP);
+  });
 </script>
 
 <svelte:head>
@@ -32,7 +68,23 @@
 </svelte:head>
 
 <div class="os">
-  <main class="wallpaper" bind:clientWidth={width} bind:clientHeight={height}>
+  <!-- The custom menu only replaces the browser's on the desktop background; it is also reachable via the Wallpaper icon. -->
+  <main
+    class="wallpaper"
+    on:contextmenu={openContextMenu}
+    class:has-image={$wallpaper.src !== null}
+    bind:clientWidth={width}
+    bind:clientHeight={height}
+  >
+    {#key $wallpaper.id}
+      <div
+        class="wallpaper-layer"
+        class:dots={$wallpaper.src === null}
+        style={$wallpaper.src ? `background-image: url("${$wallpaper.src}")` : ""}
+        transition:fade={{ duration: prefersReducedMotion() ? 0 : WALLPAPER_FADE_MS }}
+      />
+    {/key}
+
     <ul class="icons" aria-label="Desktop">
       {#each apps as app (app.id)}
         <li>
@@ -66,6 +118,15 @@
         </AppWindow>
       {/if}
     {/each}
+
+    {#if contextMenuAt}
+      <ContextMenu
+        at={contextMenuAt}
+        {desktopSize}
+        onChangeWallpaper={() => openApp("wallpaper")}
+        onClose={() => (contextMenuAt = null)}
+      />
+    {/if}
   </main>
 
   <Taskbar windows={$desktop.windows} {activeId} {desktop} />
@@ -110,10 +171,26 @@
     min-height: 0;
     overflow: hidden;
     background-color: var(--os-wallpaper);
+  }
+  .wallpaper-layer {
+    position: absolute;
+    inset: 0;
+    background-position: center;
+    background-size: cover;
+  }
+  .wallpaper-layer.dots {
     background-image: radial-gradient(var(--os-dot) 1px, transparent 1px);
     background-size: 22px 22px;
   }
+  /* Image wallpapers have fixed colours, so tone them down to sit with the dark theme. */
+  :global(.dark) .wallpaper-layer:not(.dots)::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgb(0 0 0 / 0.3);
+  }
   .icons {
+    position: relative;
     display: grid;
     grid-template-columns: repeat(3, auto);
     gap: 0.5rem;
@@ -121,8 +198,12 @@
     padding: 1rem;
   }
   @media (min-width: 768px) {
+    /* One column that wraps into a second one on short screens instead of being cut off. */
     .icons {
-      grid-template-columns: auto;
+      grid-auto-flow: column;
+      grid-template-columns: none;
+      grid-template-rows: repeat(auto-fill, 5.5rem);
+      height: 100%;
     }
   }
   .icon {
@@ -158,7 +239,16 @@
     box-shadow: none;
   }
   .icon-label {
+    padding: 0 0.375rem;
+    border-radius: 0.25rem;
     font-size: 0.75rem;
     font-weight: 600;
+  }
+  /* A theme-coloured backing keeps labels readable on any image, light or dark. */
+  .has-image .icon-label {
+    background: color-mix(in srgb, var(--os-window) 85%, transparent);
+  }
+  .has-image .icon:hover {
+    background: color-mix(in srgb, var(--os-window) 30%, transparent);
   }
 </style>

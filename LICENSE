@@ -1,0 +1,62 @@
+This repository contains two kinds of material, licensed differently.
+
+================================================================================
+1. Source code: MIT License
+================================================================================
+
+Applies to the source code in this repository (for example *.ts, *.js,
+*.svelte and configuration files), except for the material listed in
+section 2.
+
+Copyright (c) 2026 Ahmad Farras Syafrin
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+================================================================================
+2. Content and visual design: All rights reserved
+================================================================================
+
+Copyright (c) 2026 Ahmad Farras Syafrin. All rights reserved.
+
+The following are NOT covered by the MIT License above:
+
+  - Personal information and written content, including the profile,
+    biography, work experience and any other text about Ahmad Farras
+    Syafrin (for example the files in src/lib/data/ and the copy in the
+    page and window components).
+  - The overall visual design and branding of the site, including the
+    "Farras OS" desktop presentation, its layout, colour scheme and look
+    and feel as a whole.
+  - Images and wallpapers in static/ that were created for this site.
+
+You may view this material and link to the site. You may not copy,
+republish or redistribute it, or publish a site that reproduces this site's
+content or overall design, without prior written permission.
+
+You are welcome to learn from and reuse individual pieces of the source code
+under the MIT License, provided the result does not reproduce the content or
+overall design described above.
+
+================================================================================
+Third-party material
+================================================================================
+
+Company and technology logos in static/logos/ are trademarks of their
+respective owners. They are used only to identify employers and tools, and
+are not licensed under either section above.

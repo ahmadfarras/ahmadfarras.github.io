@@ -4,6 +4,7 @@
   import { getOpenApp } from "../context";
 
   const openApp = getOpenApp();
+  const year = new Date().getFullYear();
 </script>
 
 <div class="space-y-5 p-6">
@@ -45,6 +46,10 @@
     <span>Prefer a simple page?</span>
     <ViewSwitch to="classic" />
   </div>
+
+  <p class="text-xs text-gray-500 dark:text-gray-400">
+    © {year} Ahmad Farras Syafrin. All rights reserved.
+  </p>
 </div>
 
 <style>

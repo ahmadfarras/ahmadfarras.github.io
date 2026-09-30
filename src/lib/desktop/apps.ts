@@ -4,6 +4,7 @@ import {
   CodeOutline,
   GithubSolid,
   LinkedinSolid,
+  ImageSolid,
   MessagesSolid,
   UserCircleSolid
 } from "flowbite-svelte-icons";
@@ -11,6 +12,7 @@ import About from "./apps/About.svelte";
 import Contact from "./apps/Contact.svelte";
 import Experience from "./apps/Experience.svelte";
 import Stack from "./apps/Stack.svelte";
+import WallpaperPicker from "./apps/WallpaperPicker.svelte";
 import type { Size } from "./windowManager";
 
 interface BaseApp {
@@ -41,7 +43,7 @@ export const apps: DesktopApp[] = [
     title: "About me",
     icon: UserCircleSolid,
     content: About,
-    size: { width: 560, height: 460 }
+    size: { width: 560, height: 630 }
   },
   {
     kind: "window",
@@ -66,6 +68,14 @@ export const apps: DesktopApp[] = [
     icon: MessagesSolid,
     content: Contact,
     size: { width: 420, height: 320 }
+  },
+  {
+    kind: "window",
+    id: "wallpaper",
+    title: "Wallpaper",
+    icon: ImageSolid,
+    content: WallpaperPicker,
+    size: { width: 560, height: 440 }
   },
   {
     kind: "link",
