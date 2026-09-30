@@ -14,8 +14,8 @@ describe("apps", () => {
     }
   });
 
-  it("includes Tetris in the Games folder", () => {
-    expect(windowAppsById.get("tetris")?.folder).toBe("games");
+  it.each(["tetris", "snake"])("includes %s in the Games folder", (id) => {
+    expect(windowAppsById.get(id)?.folder).toBe("games");
   });
 });
 

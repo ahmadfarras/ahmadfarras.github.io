@@ -1,4 +1,6 @@
 import type { WindowApp } from "$lib/desktop/apps";
+import Snake from "./Snake.svelte";
+import SnakeIcon from "./SnakeIcon.svelte";
 import Tetris from "./Tetris.svelte";
 import TetrisIcon from "./TetrisIcon.svelte";
 
@@ -11,6 +13,15 @@ export const games: WindowApp[] = [
     icon: TetrisIcon,
     content: Tetris,
     size: { width: 440, height: 580 },
+    folder: "games"
+  },
+  {
+    kind: "window",
+    id: "snake",
+    title: "Snake",
+    icon: SnakeIcon,
+    content: Snake,
+    size: { width: 480, height: 430 },
     folder: "games"
   }
 ];

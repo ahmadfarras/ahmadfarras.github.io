@@ -1,11 +1,9 @@
-export const BEST_SCORE_KEY = "tetris-best-score";
-
 type ScoreStorage = Pick<Storage, "getItem" | "setItem">;
 
-/** Best score saved in this browser; 0 when missing, invalid or unreadable. */
-export function loadBestScore(storage: ScoreStorage | null): number {
+/** Best score saved under `key` in this browser; 0 when missing, invalid or unreadable. */
+export function loadBestScore(storage: ScoreStorage | null, key: string): number {
   try {
-    const saved = Number.parseInt(storage?.getItem(BEST_SCORE_KEY) ?? "", 10);
+    const saved = Number.parseInt(storage?.getItem(key) ?? "", 10);
     return Number.isFinite(saved) && saved > 0 ? saved : 0;
   } catch {
     return 0;
@@ -13,10 +11,10 @@ export function loadBestScore(storage: ScoreStorage | null): number {
 }
 
 /** Saves `score` if it beats the stored best and returns the (possibly new) best. */
-export function saveBestScore(storage: ScoreStorage | null, score: number): number {
-  const best = Math.max(loadBestScore(storage), score);
+export function saveBestScore(storage: ScoreStorage | null, key: string, score: number): number {
+  const best = Math.max(loadBestScore(storage, key), score);
   try {
-    storage?.setItem(BEST_SCORE_KEY, String(best));
+    storage?.setItem(key, String(best));
   } catch {
     // Not persisting is fine: the best score still shows for this visit.
   }
