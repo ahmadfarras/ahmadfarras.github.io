@@ -30,6 +30,14 @@ npm run build
 
 The site is deployed to GitHub Pages. The build output is in the `build/` directory.
 
+## License
+
+- **Source code:** [MIT](LICENSE). Feel free to learn from and reuse pieces of the code.
+- **Content and design:** all rights reserved. The profile, experience, text, images and the overall "Farras OS" look may not be copied or republished without permission.
+- **Logos** in `static/logos/` belong to their respective owners.
+
+See [LICENSE](LICENSE) for the full terms.
+
 ## Author
 
 Ahmad Farras Syafrin

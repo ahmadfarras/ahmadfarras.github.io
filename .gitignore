@@ -9,3 +9,13 @@ node_modules
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .github/agents
+
+# Local tooling
+.claude/
+.vscode/
+.idea/
+
+# Logs and test output
+*.log
+npm-debug.log*
+coverage/
