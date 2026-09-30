@@ -57,7 +57,7 @@ export const apps: DesktopApp[] = [
     title: "Tech stack",
     icon: CodeOutline,
     content: Stack,
-    size: { width: 520, height: 380 }
+    size: { width: 640, height: 610 }
   },
   {
     kind: "window",
