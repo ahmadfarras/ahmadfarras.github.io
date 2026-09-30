@@ -1,11 +1,12 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { fade } from "svelte/transition";
+  import { browserStorage } from "$lib/browserStorage";
   import AppWindow from "./AppWindow.svelte";
   import ContextMenu from "./ContextMenu.svelte";
   import Dock from "./Dock.svelte";
   import MenuBar from "./MenuBar.svelte";
-  import { windowAppsById } from "./apps";
+  import { dockIconId, windowAppsById } from "./apps";
   import { setOpenApp, setWallpaperStore } from "./context";
   import { createWallpaperStore } from "./wallpapers";
   import {
@@ -54,15 +55,6 @@
     contextMenuAt = { x: event.clientX - bounds.left, y: event.clientY - bounds.top };
   }
 
-  /** localStorage can throw on access when site data is blocked; treat that as "no storage". */
-  function browserStorage(): Storage | null {
-    try {
-      return typeof localStorage === "undefined" ? null : localStorage;
-    } catch {
-      return null;
-    }
-  }
-
   const prefersReducedMotion = () =>
     typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -106,6 +98,7 @@
           desktopSize={workArea}
           {isCompact}
           title={app.title}
+          dockIconId={dockIconId(app)}
           isActive={win.id === activeId}
         >
           <svelte:component this={app.content} />

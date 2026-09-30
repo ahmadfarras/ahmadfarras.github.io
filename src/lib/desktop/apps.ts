@@ -11,8 +11,11 @@ import {
 import About from "./apps/About.svelte";
 import Contact from "./apps/Contact.svelte";
 import Experience from "./apps/Experience.svelte";
+import GamesFolder from "./apps/GamesFolder.svelte";
 import Stack from "./apps/Stack.svelte";
 import WallpaperPicker from "./apps/WallpaperPicker.svelte";
+import GamepadIcon from "$lib/components/GamepadIcon.svelte";
+import { games } from "$lib/games/registry";
 import type { Size } from "./windowManager";
 
 interface BaseApp {
@@ -26,6 +29,11 @@ export interface WindowApp extends BaseApp {
   kind: "window";
   content: ComponentType;
   size: Size;
+  /**
+   * Id of the folder app (e.g. "games") this app is opened from. It has no Dock icon of its own;
+   * the folder's icon stands in for it (running dot, minimize target).
+   */
+  folder?: string;
 }
 
 /** Desktop shortcut to an external page. */
@@ -71,12 +79,21 @@ export const apps: DesktopApp[] = [
   },
   {
     kind: "window",
+    id: "games",
+    title: "Games",
+    icon: GamepadIcon,
+    content: GamesFolder,
+    size: { width: 420, height: 260 }
+  },
+  {
+    kind: "window",
     id: "wallpaper",
     title: "Wallpaper",
     icon: ImageSolid,
     content: WallpaperPicker,
     size: { width: 560, height: 440 }
   },
+  ...games,
   {
     kind: "link",
     id: "github",
@@ -92,6 +109,9 @@ export const apps: DesktopApp[] = [
     href: "https://www.linkedin.com/in/ahmad-farras-syafrin/"
   }
 ];
+
+/** Id of the Dock icon that represents an app: its folder's, or its own. */
+export const dockIconId = (app: WindowApp): string => app.folder ?? app.id;
 
 export const windowAppsById = new Map(
   apps.filter((app): app is WindowApp => app.kind === "window").map((app) => [app.id, app])
