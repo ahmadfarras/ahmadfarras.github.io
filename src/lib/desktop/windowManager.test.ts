@@ -6,9 +6,11 @@ import {
   clampPosition,
   closeWindow,
   createDesktopStore,
+  displayRect,
   emptyDesktop,
   focusWindow,
   initialRect,
+  minimizeTransform,
   minimizeWindow,
   moveWindow,
   openWindow,
@@ -156,6 +158,28 @@ describe("initialRect", () => {
     expect(result.width).toBe(452);
     expect(result.height).toBe(552);
     expect(result.x + result.width).toBeLessThanOrEqual(500);
+  });
+});
+
+describe("displayRect", () => {
+  it("returns the window's own rect when not full size", () => {
+    const win = { ...rect, id: "about", z: 1, isMinimized: false, isMaximized: false };
+    expect(displayRect(win, false, desktop)).toEqual(rect);
+  });
+
+  it("covers the whole desktop when full size", () => {
+    expect(displayRect(rect, true, desktop)).toEqual({ x: 0, y: 0, ...desktop });
+  });
+});
+
+describe("minimizeTransform", () => {
+  it("moves the window centre onto the target and shrinks it", () => {
+    // Window centre is (210, 170).
+    expect(minimizeTransform(rect, { x: 300, y: 800 })).toBe("translate(90px, 630px) scale(0.1)");
+  });
+
+  it("handles targets up and to the left", () => {
+    expect(minimizeTransform(rect, { x: 10, y: 20 })).toBe("translate(-200px, -150px) scale(0.1)");
   });
 });
 

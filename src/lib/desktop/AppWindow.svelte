@@ -1,8 +1,16 @@
 <script lang="ts">
   import { scale } from "svelte/transition";
-  import { quintOut } from "svelte/easing";
+  import { backOut, cubicIn } from "svelte/easing";
   import { CloseOutline, ExpandOutline, MinusOutline } from "flowbite-svelte-icons";
-  import { clampPosition, type DesktopStore, type Size, type WindowState } from "./windowManager";
+  import {
+    clampPosition,
+    displayRect,
+    minimizeTransform,
+    type DesktopStore,
+    type Point,
+    type Size,
+    type WindowState
+  } from "./windowManager";
 
   export let win: WindowState;
   export let title: string;
@@ -14,10 +22,31 @@
   type Gesture = { kind: "move" | "resize"; pointerX: number; pointerY: number; origin: WindowState };
   let gesture: Gesture | null = null;
 
+  const prefersReducedMotion =
+    typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const openTransition = { start: 0.85, duration: prefersReducedMotion ? 0 : 260, easing: backOut };
+  const closeTransition = { start: 0.9, duration: prefersReducedMotion ? 0 : 150, easing: cubicIn };
+
+  let element: HTMLElement;
+
   $: isFullSize = isCompact || win.isMaximized;
-  $: position = isFullSize
-    ? `inset: 0; z-index: ${win.z};`
-    : `left: ${win.x}px; top: ${win.y}px; width: ${win.width}px; height: ${win.height}px; z-index: ${win.z};`;
+  $: rect = displayRect(win, isFullSize, desktopSize);
+  $: transform = win.isMinimized ? `transform: ${minimizeTransform(rect, taskbarTarget())};` : "";
+  $: style = `left: ${rect.x}px; top: ${rect.y}px; width: ${rect.width}px; height: ${rect.height}px; z-index: ${win.z}; ${transform}`;
+
+  /** Centre of this window's taskbar button, relative to the desktop; bottom centre as a fallback. */
+  function taskbarTarget(): Point {
+    const fallback = { x: desktopSize.width / 2, y: desktopSize.height };
+    const button = document.querySelector(`[data-task-id="${win.id}"]`);
+    const parent = element?.offsetParent;
+    if (!button || !parent) return fallback;
+    const buttonRect = button.getBoundingClientRect();
+    const parentRect = parent.getBoundingClientRect();
+    return {
+      x: buttonRect.left + buttonRect.width / 2 - parentRect.left,
+      y: buttonRect.top + buttonRect.height / 2 - parentRect.top
+    };
+  }
 
   function startGesture(event: PointerEvent, kind: Gesture["kind"]) {
     if (isFullSize || event.button !== 0) return;
@@ -60,10 +89,15 @@
   class:active={isActive}
   class:full-size={isFullSize}
   class:dragging={gesture !== null}
-  style={position}
+  class:minimized={win.isMinimized}
+  aria-hidden={win.isMinimized}
+  inert={win.isMinimized}
+  bind:this={element}
+  {style}
   on:pointerdown={() => desktop.focus(win.id)}
   on:keydown={handleKeydown}
-  transition:scale={{ start: 0.94, duration: 180, easing: quintOut }}
+  in:scale={openTransition}
+  out:scale={closeTransition}
 >
   <!-- svelte-ignore a11y-no-static-element-interactions -->
   <header
@@ -123,6 +157,33 @@
     background: var(--os-window);
     box-shadow: 0 8px 24px rgb(0 0 0 / 0.12);
     outline: none;
+    transition:
+      left var(--os-motion),
+      top var(--os-motion),
+      width var(--os-motion),
+      height var(--os-motion),
+      border-radius var(--os-motion),
+      transform var(--os-motion),
+      opacity 160ms ease-out,
+      visibility 0s;
+  }
+  .window.minimized {
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
+    /* Fade late so the shrink stays visible; hide only after it ends so it can't be tabbed into. */
+    transition:
+      left var(--os-motion),
+      top var(--os-motion),
+      width var(--os-motion),
+      height var(--os-motion),
+      transform var(--os-motion),
+      opacity var(--os-motion-duration) cubic-bezier(0.7, 0, 1, 1),
+      visibility 0s var(--os-motion-duration);
+  }
+  /* Direct manipulation must follow the pointer 1:1. */
+  .window.dragging {
+    transition: none;
   }
   .window.active {
     border-color: var(--os-border-strong);
@@ -134,6 +195,11 @@
   }
   .window.dragging {
     user-select: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .window {
+      transition: none;
+    }
   }
   .title-bar {
     display: flex;

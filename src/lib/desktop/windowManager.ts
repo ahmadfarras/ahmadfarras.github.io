@@ -137,6 +137,27 @@ export function initialRect(preferred: Size, openCount: number, desktop: Size): 
   return { ...clamped, width, height };
 }
 
+export interface Point {
+  x: number;
+  y: number;
+}
+
+// Scale a minimized window shrinks to, roughly the size of a taskbar button.
+const MINIMIZED_SCALE = 0.1;
+
+/** The rect a window actually occupies: the whole desktop when full size, its own rect otherwise. */
+export function displayRect(window: Rect, isFullSize: boolean, desktop: Size): Rect {
+  if (!isFullSize) return { x: window.x, y: window.y, width: window.width, height: window.height };
+  return { x: 0, y: 0, width: desktop.width, height: desktop.height };
+}
+
+/** CSS transform that shrinks a window (centre-origin) into `target`, e.g. its taskbar button. */
+export function minimizeTransform(rect: Rect, target: Point): string {
+  const dx = target.x - (rect.x + rect.width / 2);
+  const dy = target.y - (rect.y + rect.height / 2);
+  return `translate(${dx}px, ${dy}px) scale(${MINIMIZED_SCALE})`;
+}
+
 export function createDesktopStore(initial: DesktopState = emptyDesktop()) {
   const { subscribe, update } = writable(initial);
   return {

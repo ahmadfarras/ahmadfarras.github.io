@@ -16,7 +16,6 @@
   $: desktopSize = { width, height };
   $: isCompact = width < COMPACT_BREAKPOINT;
   $: activeId = activeWindowId($desktop);
-  $: visibleWindows = $desktop.windows.filter((win) => !win.isMinimized);
 
   function openApp(id: string) {
     const app = windowAppsById.get(id);
@@ -52,7 +51,7 @@
       {/each}
     </ul>
 
-    {#each visibleWindows as win (win.id)}
+    {#each $desktop.windows as win (win.id)}
       {@const app = windowAppsById.get(win.id)}
       {#if app}
         <AppWindow
@@ -85,6 +84,8 @@
     --os-ink: #151515;
     --os-accent: #f7a501;
     --os-hover: rgb(0 0 0 / 0.07);
+    --os-motion-duration: 280ms;
+    --os-motion: var(--os-motion-duration) cubic-bezier(0.2, 0.8, 0.2, 1);
     display: flex;
     flex-direction: column;
     height: 100dvh;

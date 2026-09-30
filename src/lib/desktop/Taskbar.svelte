@@ -34,6 +34,7 @@
             class:active={win.id === activeId}
             class:minimized={win.isMinimized}
             aria-pressed={win.id === activeId}
+            data-task-id={win.id}
             on:click={() => desktop.toggleFromTaskbar(win.id)}
           >
             <svelte:component this={app.icon} size="sm" />
