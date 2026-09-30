@@ -1,11 +1,14 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { fade } from "svelte/transition";
+  import { browserStorage } from "$lib/browserStorage";
   import AppWindow from "./AppWindow.svelte";
+  import BootScreen from "./BootScreen.svelte";
   import ContextMenu from "./ContextMenu.svelte";
   import Dock from "./Dock.svelte";
   import MenuBar from "./MenuBar.svelte";
-  import { windowAppsById } from "./apps";
+  import { dockIconId, windowAppsById } from "./apps";
+  import { BOOT_FINISH_MS, hasBooted, markBooted, remainingBootMs } from "./boot";
   import { setOpenApp, setWallpaperStore } from "./context";
   import { createWallpaperStore } from "./wallpapers";
   import {
@@ -29,6 +32,8 @@
   let height = 0;
   let dockHeight = 0;
   let contextMenuAt: Point | null = null;
+  /** "booting" until the app is interactive, "finishing" while the boot screen fills and fades. */
+  let bootPhase: "booting" | "finishing" | "done" = hasBooted() ? "done" : "booting";
 
   $: desktopSize = { width, height };
   /** The part of the desktop windows may use: everything above the Dock. */
@@ -54,15 +59,6 @@
     contextMenuAt = { x: event.clientX - bounds.left, y: event.clientY - bounds.top };
   }
 
-  /** localStorage can throw on access when site data is blocked; treat that as "no storage". */
-  function browserStorage(): Storage | null {
-    try {
-      return typeof localStorage === "undefined" ? null : localStorage;
-    } catch {
-      return null;
-    }
-  }
-
   const prefersReducedMotion = () =>
     typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -70,7 +66,24 @@
   setWallpaperStore(wallpaper);
   onMount(() => {
     wallpaper.load();
-    openApp(START_APP);
+    if (bootPhase === "done") {
+      openApp(START_APP);
+      return;
+    }
+    // performance.now() counts from the start of navigation, so a slow load skips the minimum.
+    let finishTimer: ReturnType<typeof setTimeout> | undefined;
+    const bootTimer = setTimeout(() => {
+      bootPhase = "finishing";
+      finishTimer = setTimeout(() => {
+        bootPhase = "done";
+        markBooted();
+        openApp(START_APP);
+      }, BOOT_FINISH_MS);
+    }, remainingBootMs(performance.now()));
+    return () => {
+      clearTimeout(bootTimer);
+      clearTimeout(finishTimer);
+    };
   });
 </script>
 
@@ -79,6 +92,10 @@
 </svelte:head>
 
 <div class="os">
+  {#if bootPhase !== "done"}
+    <BootScreen isReady={bootPhase === "finishing"} />
+  {/if}
+
   <MenuBar {activeTitle} />
 
   <!-- The custom menu only replaces the browser's on the desktop background; Wallpaper is also in the Dock. -->
@@ -106,6 +123,7 @@
           desktopSize={workArea}
           {isCompact}
           title={app.title}
+          dockIconId={dockIconId(app)}
           isActive={win.id === activeId}
         >
           <svelte:component this={app.content} />
@@ -143,6 +161,7 @@
     --os-dock-border: rgb(255 255 255 / 0.6);
     --os-motion-duration: 280ms;
     --os-motion: var(--os-motion-duration) cubic-bezier(0.2, 0.8, 0.2, 1);
+    position: relative;
     display: flex;
     flex-direction: column;
     height: 100dvh;

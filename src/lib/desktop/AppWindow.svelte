@@ -18,6 +18,8 @@
   export let desktopSize: Size;
   export let isActive: boolean;
   export let isCompact: boolean;
+  /** Dock icon this window minimizes into. */
+  export let dockIconId: string;
 
   type Gesture = { kind: "move" | "resize"; pointerX: number; pointerY: number; origin: WindowState };
   let gesture: Gesture | null = null;
@@ -37,7 +39,7 @@
   /** Centre of this window's Dock icon, relative to the desktop; bottom centre as a fallback. */
   function dockTarget(): Point {
     const fallback = { x: desktopSize.width / 2, y: desktopSize.height };
-    const button = document.querySelector(`[data-task-id="${win.id}"]`);
+    const button = document.querySelector(`[data-task-id="${dockIconId}"]`);
     const parent = element?.offsetParent;
     if (!button || !parent) return fallback;
     const buttonRect = button.getBoundingClientRect();

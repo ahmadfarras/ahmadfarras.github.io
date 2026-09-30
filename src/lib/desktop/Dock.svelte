@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { apps, type LinkApp, type WindowApp } from "./apps";
+  import { apps, dockIconId, windowAppsById, type LinkApp, type WindowApp } from "./apps";
   import { dockScales } from "./dock";
   import type { WindowState } from "./windowManager";
 
@@ -8,14 +8,22 @@
   /** Rendered height, so the desktop can keep windows clear of the Dock. */
   export let height = 0;
 
-  const windowApps = apps.filter((app): app is WindowApp => app.kind === "window");
+  const windowApps = apps.filter(
+    (app): app is WindowApp => app.kind === "window" && !app.folder
+  );
   const linkApps = apps.filter((app): app is LinkApp => app.kind === "link");
 
   let items: HTMLElement;
   let restingCentres: number[] = [];
   let scales: number[] = [];
 
-  $: openIds = new Set(windows.map((win) => win.id));
+  /** Dock icons with at least one open window behind them (a folder counts its apps' windows). */
+  $: runningIconIds = new Set(
+    windows.map((win) => {
+      const app = windowAppsById.get(win.id);
+      return app ? dockIconId(app) : win.id;
+    })
+  );
 
   const prefersReducedMotion = () =>
     typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -63,7 +71,7 @@
           <svelte:component this={app.icon} class="h-1/2 w-1/2" />
         </button>
         <span class="tooltip" aria-hidden="true">{app.title}</span>
-        {#if openIds.has(app.id)}
+        {#if runningIconIds.has(app.id)}
           <span class="running" aria-hidden="true" />
         {/if}
       </li>
@@ -106,9 +114,13 @@
     backdrop-filter: blur(18px) saturate(1.6);
     -webkit-backdrop-filter: blur(18px) saturate(1.6);
   }
+  /* Eight icons plus the separator have to fit a 375px-wide phone. */
   @media (max-width: 639px) {
     .dock {
-      --tile: 2.5rem;
+      --tile: 2.25rem;
+    }
+    .items {
+      gap: 0.3125rem;
     }
   }
   .items {
