@@ -87,6 +87,9 @@
           target="_blank"
           rel="noopener noreferrer"
           aria-label="{app.title} (opens in a new tab)"
+          data-umami-event="open-link"
+          data-umami-event-link={app.id}
+          data-umami-event-from="dock"
         >
           <svelte:component this={app.icon} class="h-1/2 w-1/2" />
         </a>

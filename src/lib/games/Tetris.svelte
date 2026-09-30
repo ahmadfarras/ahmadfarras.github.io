@@ -131,6 +131,7 @@
   name="Tetris"
   instructions="Arrow keys move and rotate, Space drops, P pauses."
   {status}
+  score={game.score}
   boardRatio={COLS / ROWS}
   helpLines={["←→ MOVE", "↑ ROTATE", "↓ SOFT DROP", "SPACE DROP", "P PAUSE"]}
   onStart={start}

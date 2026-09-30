@@ -1,8 +1,14 @@
 <script lang="ts">
+  import { track } from "$lib/analytics";
   import { getWallpaperStore } from "../context";
   import { wallpapers } from "../wallpapers";
 
   const wallpaper = getWallpaperStore();
+
+  function choose(id: string) {
+    wallpaper.select(id);
+    track("change-wallpaper", { wallpaper: id });
+  }
 </script>
 
 <div class="space-y-4 p-6">
@@ -19,7 +25,7 @@
           class="option"
           class:selected={isSelected}
           aria-pressed={isSelected}
-          on:click={() => wallpaper.select(option.id)}
+          on:click={() => choose(option.id)}
         >
           <span
             class="preview"

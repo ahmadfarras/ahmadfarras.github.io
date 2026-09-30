@@ -51,7 +51,7 @@ export const apps: DesktopApp[] = [
     title: "About me",
     icon: UserCircleSolid,
     content: About,
-    size: { width: 560, height: 630 }
+    size: { width: 560, height: 660 }
   },
   {
     kind: "window",

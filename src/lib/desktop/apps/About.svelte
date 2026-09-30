@@ -48,7 +48,8 @@
   </div>
 
   <p class="text-xs text-gray-500 dark:text-gray-400">
-    © {year} Ahmad Farras Syafrin. All rights reserved.
+    © {year} Ahmad Farras Syafrin. All rights reserved.<br />
+    Visits are counted with privacy-friendly analytics (Umami): no cookies, no personal data.
   </p>
 </div>
 
