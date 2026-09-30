@@ -30,7 +30,6 @@ const VISIBLE_GRAB_AREA = 80;
 const TITLE_BAR_HEIGHT = 40;
 const CASCADE_OFFSET = 32;
 const DESKTOP_PADDING = 24;
-const ICON_COLUMN_WIDTH = 120;
 
 export const emptyDesktop = (): DesktopState => ({ windows: [], nextZ: 1 });
 
@@ -98,11 +97,6 @@ export function toggleMaximize(state: DesktopState, id: string): DesktopState {
   return updateWindow(state, id, (window) => ({ ...window, isMaximized: !window.isMaximized }));
 }
 
-/** Taskbar behaviour: clicking the active window minimizes it, anything else brings it forward. */
-export function toggleFromTaskbar(state: DesktopState, id: string): DesktopState {
-  return activeWindowId(state) === id ? minimizeWindow(state, id) : focusWindow(state, id);
-}
-
 export function activeWindowId(state: DesktopState): string | null {
   let active: WindowState | null = null;
   for (const window of state.windows) {
@@ -126,7 +120,7 @@ export function initialRect(preferred: Size, openCount: number, desktop: Size): 
   const height = Math.min(preferred.height, desktop.height - DESKTOP_PADDING * 2);
   const offset = (openCount % 6) * CASCADE_OFFSET;
   const centeredX = (desktop.width - width) / 2;
-  const x = Math.max(ICON_COLUMN_WIDTH, centeredX) + offset;
+  const x = Math.max(DESKTOP_PADDING, centeredX) + offset;
   const y = Math.max(DESKTOP_PADDING, (desktop.height - height) / 3) + offset;
   const clamped = clampPosition(
     Math.min(x, desktop.width - width - DESKTOP_PADDING),
@@ -142,7 +136,7 @@ export interface Point {
   y: number;
 }
 
-// Scale a minimized window shrinks to, roughly the size of a taskbar button.
+// Scale a minimized window shrinks to, roughly the size of a Dock icon.
 const MINIMIZED_SCALE = 0.1;
 
 /** The rect a window actually occupies: the whole desktop when full size, its own rect otherwise. */
@@ -151,7 +145,7 @@ export function displayRect(window: Rect, isFullSize: boolean, desktop: Size): R
   return { x: 0, y: 0, width: desktop.width, height: desktop.height };
 }
 
-/** CSS transform that shrinks a window (centre-origin) into `target`, e.g. its taskbar button. */
+/** CSS transform that shrinks a window (centre-origin) into `target`, e.g. its Dock icon. */
 export function minimizeTransform(rect: Rect, target: Point): string {
   const dx = target.x - (rect.x + rect.width / 2);
   const dy = target.y - (rect.y + rect.height / 2);
@@ -181,8 +175,7 @@ export function createDesktopStore(initial: DesktopState = emptyDesktop()) {
     resize: (id: string, width: number, height: number) =>
       update((state) => resizeWindow(state, id, width, height)),
     minimize: (id: string) => update((state) => minimizeWindow(state, id)),
-    toggleMaximize: (id: string) => update((state) => toggleMaximize(state, id)),
-    toggleFromTaskbar: (id: string) => update((state) => toggleFromTaskbar(state, id))
+    toggleMaximize: (id: string) => update((state) => toggleMaximize(state, id))
   };
 }
 

@@ -16,7 +16,6 @@ import {
   moveWindow,
   openWindow,
   resizeWindow,
-  toggleFromTaskbar,
   toggleMaximize,
   type DesktopState
 } from "./windowManager";
@@ -104,23 +103,6 @@ describe("minimize / maximize", () => {
   });
 });
 
-describe("toggleFromTaskbar", () => {
-  it("minimizes the active window", () => {
-    const state = toggleFromTaskbar(withWindows("about", "stack"), "stack");
-    expect(byId(state, "stack").isMinimized).toBe(true);
-  });
-
-  it("brings back a background or minimized window", () => {
-    const background = toggleFromTaskbar(withWindows("about", "stack"), "about");
-    expect(activeWindowId(background)).toBe("about");
-
-    const minimized = minimizeWindow(withWindows("about", "stack"), "stack");
-    const restored = toggleFromTaskbar(minimized, "stack");
-    expect(byId(restored, "stack").isMinimized).toBe(false);
-    expect(activeWindowId(restored)).toBe("stack");
-  });
-});
-
 describe("activeWindowId", () => {
   it("is null on an empty desktop", () => {
     expect(activeWindowId(emptyDesktop())).toBeNull();
@@ -140,10 +122,9 @@ describe("clampPosition", () => {
 });
 
 describe("initialRect", () => {
-  it("uses the preferred size when it fits and clears the icon column", () => {
+  it("uses the preferred size when it fits and centres it horizontally", () => {
     const result = initialRect({ width: 600, height: 400 }, 0, desktop);
-    expect(result).toMatchObject({ width: 600, height: 400 });
-    expect(result.x).toBeGreaterThanOrEqual(120);
+    expect(result).toMatchObject({ x: (1280 - 600) / 2, width: 600, height: 400 });
     expect(result.y + result.height).toBeLessThanOrEqual(desktop.height);
   });
 
@@ -232,7 +213,7 @@ describe("createDesktopStore", () => {
     expect(byId(state, "about")).toMatchObject({ x: 5, y: 6, width: 500, isMaximized: true });
     expect(byId(state, "stack").isMinimized).toBe(true);
 
-    store.toggleFromTaskbar("stack");
+    store.focus("stack");
     store.close("about");
     state = get(store);
     expect(state.windows.map((w) => w.id)).toEqual(["stack"]);

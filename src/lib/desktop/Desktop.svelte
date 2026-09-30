@@ -3,8 +3,9 @@
   import { fade } from "svelte/transition";
   import AppWindow from "./AppWindow.svelte";
   import ContextMenu from "./ContextMenu.svelte";
-  import Taskbar from "./Taskbar.svelte";
-  import { apps, windowAppsById } from "./apps";
+  import Dock from "./Dock.svelte";
+  import MenuBar from "./MenuBar.svelte";
+  import { windowAppsById } from "./apps";
   import { setOpenApp, setWallpaperStore } from "./context";
   import { createWallpaperStore } from "./wallpapers";
   import {
@@ -18,26 +19,36 @@
   const START_APP = "about";
 
   const WALLPAPER_FADE_MS = 400;
+  // Used until the Dock has been measured, and the gap kept between it and the windows.
+  const DOCK_FALLBACK_HEIGHT = 72;
+  const DOCK_CLEARANCE = 16;
 
   const desktop = createDesktopStore();
   const wallpaper = createWallpaperStore(browserStorage());
   let width = 0;
   let height = 0;
+  let dockHeight = 0;
   let contextMenuAt: Point | null = null;
 
   $: desktopSize = { width, height };
+  /** The part of the desktop windows may use: everything above the Dock. */
+  $: workArea = {
+    width,
+    height: Math.max(0, height - (dockHeight || DOCK_FALLBACK_HEIGHT) - DOCK_CLEARANCE)
+  };
   $: isCompact = width < COMPACT_BREAKPOINT;
   $: activeId = activeWindowId($desktop);
+  $: activeTitle = activeId ? (windowAppsById.get(activeId)?.title ?? null) : null;
 
   function openApp(id: string) {
     const app = windowAppsById.get(id);
     if (!app) return;
-    desktop.open(id, initialRect(app.size, $desktop.windows.length, desktopSize));
+    desktop.open(id, initialRect(app.size, $desktop.windows.length, workArea));
   }
 
-  /** Right-click on the wallpaper or icons; windows keep the browser's own menu so text can be copied. */
+  /** Right-click on the wallpaper; windows and the Dock keep the browser's own menu (copy text, open links). */
   function openContextMenu(event: MouseEvent) {
-    if ((event.target as HTMLElement).closest('[role="dialog"]')) return;
+    if ((event.target as HTMLElement).closest('[role="dialog"], nav')) return;
     event.preventDefault();
     const bounds = (event.currentTarget as HTMLElement).getBoundingClientRect();
     contextMenuAt = { x: event.clientX - bounds.left, y: event.clientY - bounds.top };
@@ -68,11 +79,12 @@
 </svelte:head>
 
 <div class="os">
-  <!-- The custom menu only replaces the browser's on the desktop background; it is also reachable via the Wallpaper icon. -->
+  <MenuBar {activeTitle} />
+
+  <!-- The custom menu only replaces the browser's on the desktop background; Wallpaper is also in the Dock. -->
   <main
     class="wallpaper"
     on:contextmenu={openContextMenu}
-    class:has-image={$wallpaper.src !== null}
     bind:clientWidth={width}
     bind:clientHeight={height}
   >
@@ -85,31 +97,13 @@
       />
     {/key}
 
-    <ul class="icons" aria-label="Desktop">
-      {#each apps as app (app.id)}
-        <li>
-          {#if app.kind === "link"}
-            <a class="icon" href={app.href} target="_blank" rel="noopener noreferrer">
-              <span class="icon-tile"><svelte:component this={app.icon} size="lg" /></span>
-              <span class="icon-label">{app.title}</span>
-            </a>
-          {:else}
-            <button type="button" class="icon" on:click={() => openApp(app.id)}>
-              <span class="icon-tile"><svelte:component this={app.icon} size="lg" /></span>
-              <span class="icon-label">{app.title}</span>
-            </button>
-          {/if}
-        </li>
-      {/each}
-    </ul>
-
     {#each $desktop.windows as win (win.id)}
       {@const app = windowAppsById.get(win.id)}
       {#if app}
         <AppWindow
           {win}
           {desktop}
-          {desktopSize}
+          desktopSize={workArea}
           {isCompact}
           title={app.title}
           isActive={win.id === activeId}
@@ -118,6 +112,8 @@
         </AppWindow>
       {/if}
     {/each}
+
+    <Dock windows={$desktop.windows} onOpen={openApp} bind:height={dockHeight} />
 
     {#if contextMenuAt}
       <ContextMenu
@@ -128,8 +124,6 @@
       />
     {/if}
   </main>
-
-  <Taskbar windows={$desktop.windows} {activeId} {desktop} />
 </div>
 
 <style>
@@ -145,6 +139,8 @@
     --os-ink: #151515;
     --os-accent: #f7a501;
     --os-hover: rgb(0 0 0 / 0.07);
+    --os-dock-bg: rgb(255 255 255 / 0.45);
+    --os-dock-border: rgb(255 255 255 / 0.6);
     --os-motion-duration: 280ms;
     --os-motion: var(--os-motion-duration) cubic-bezier(0.2, 0.8, 0.2, 1);
     display: flex;
@@ -164,6 +160,8 @@
     --os-muted: #a3a6b1;
     --os-ink: #e5e7eb;
     --os-hover: rgb(255 255 255 / 0.08);
+    --os-dock-bg: rgb(40 42 52 / 0.5);
+    --os-dock-border: rgb(255 255 255 / 0.12);
   }
   .wallpaper {
     position: relative;
@@ -188,67 +186,5 @@
     position: absolute;
     inset: 0;
     background: rgb(0 0 0 / 0.3);
-  }
-  .icons {
-    position: relative;
-    display: grid;
-    grid-template-columns: repeat(3, auto);
-    gap: 0.5rem;
-    width: fit-content;
-    padding: 1rem;
-  }
-  @media (min-width: 768px) {
-    /* One column that wraps into a second one on short screens instead of being cut off. */
-    .icons {
-      grid-auto-flow: column;
-      grid-template-columns: none;
-      grid-template-rows: repeat(auto-fill, 5.5rem);
-      height: 100%;
-    }
-  }
-  .icon {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.25rem;
-    width: 6rem;
-    padding: 0.5rem;
-    border-radius: 0.375rem;
-    text-align: center;
-  }
-  .icon:hover {
-    background: var(--os-hover);
-  }
-  .icon:focus-visible {
-    outline: 2px solid var(--os-accent);
-  }
-  .icon-tile {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 3rem;
-    height: 3rem;
-    border: 2px solid var(--os-ink);
-    border-radius: 0.75rem;
-    background: var(--os-window);
-    box-shadow: 0 3px 0 0 var(--os-ink);
-    transition: transform 0.1s;
-  }
-  .icon:active .icon-tile {
-    transform: translateY(3px);
-    box-shadow: none;
-  }
-  .icon-label {
-    padding: 0 0.375rem;
-    border-radius: 0.25rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-  }
-  /* A theme-coloured backing keeps labels readable on any image, light or dark. */
-  .has-image .icon-label {
-    background: color-mix(in srgb, var(--os-window) 85%, transparent);
-  }
-  .has-image .icon:hover {
-    background: color-mix(in srgb, var(--os-window) 30%, transparent);
   }
 </style>

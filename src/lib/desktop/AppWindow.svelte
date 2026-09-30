@@ -31,11 +31,11 @@
 
   $: isFullSize = isCompact || win.isMaximized;
   $: rect = displayRect(win, isFullSize, desktopSize);
-  $: transform = win.isMinimized ? `transform: ${minimizeTransform(rect, taskbarTarget())};` : "";
+  $: transform = win.isMinimized ? `transform: ${minimizeTransform(rect, dockTarget())};` : "";
   $: style = `left: ${rect.x}px; top: ${rect.y}px; width: ${rect.width}px; height: ${rect.height}px; z-index: ${win.z}; ${transform}`;
 
-  /** Centre of this window's taskbar button, relative to the desktop; bottom centre as a fallback. */
-  function taskbarTarget(): Point {
+  /** Centre of this window's Dock icon, relative to the desktop; bottom centre as a fallback. */
+  function dockTarget(): Point {
     const fallback = { x: desktopSize.width / 2, y: desktopSize.height };
     const button = document.querySelector(`[data-task-id="${win.id}"]`);
     const parent = element?.offsetParent;
