@@ -1,5 +1,6 @@
 <script lang="ts">
   import { images } from "$lib/data/carousel";
+  import ViewSwitch from "$lib/components/ViewSwitch.svelte";
   import { getOpenApp } from "../context";
 
   const openApp = getOpenApp();
@@ -36,6 +37,13 @@
       See my experience
     </button>
     <button type="button" class="action" on:click={() => openApp("contact")}>Get in touch</button>
+  </div>
+
+  <div
+    class="flex flex-wrap items-center gap-3 border-t border-gray-200 pt-4 text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400"
+  >
+    <span>Prefer a simple page?</span>
+    <ViewSwitch to="classic" />
   </div>
 </div>
 

@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import { base } from "$app/paths";
   import { DarkMode } from "flowbite-svelte";
+  import ViewSwitch from "$lib/components/ViewSwitch.svelte";
   import { windowAppsById } from "./apps";
   import type { DesktopStore, WindowState } from "./windowManager";
 
@@ -45,6 +46,7 @@
     {/each}
   </ul>
 
+  <ViewSwitch to="classic" compact />
   <DarkMode btnClass="rounded p-1.5 hover:bg-black/10 dark:hover:bg-white/10" />
   <time class="clock">{time}</time>
 </nav>
