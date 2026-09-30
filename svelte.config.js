@@ -6,6 +6,9 @@ const config = {
   preprocess: [vitePreprocess({})],
 
   kit: {
+    // Inline the CSS into each prerendered page so the desktop's boot screen paints as soon as
+    // the HTML arrives, instead of waiting for a separate stylesheet on a slow connection.
+    inlineStyleThreshold: Infinity,
     adapter: adapter({
       pages: 'build',
       assets: 'build',
