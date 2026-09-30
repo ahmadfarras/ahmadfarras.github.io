@@ -16,7 +16,7 @@
     customSize="text-4xl font-extrabold md:text-5xl lg:text-6xl">Ahmad Farras Syafrin</Heading
   >
   <P class="mb-6 text-center text-lg dark:text-gray-400 sm:px-16 lg:text-xl xl:px-48"
-    >Software Engineer | Full Stack Developer</P
+    >Senior Software Engineer | Full Stack Engineer</P
   >
   <div class="w-24">
     <Carousel
