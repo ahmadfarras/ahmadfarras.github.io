@@ -11,7 +11,7 @@ export const PRODUCTION_HOST = "ahmadfarrassyafrin.com";
 
 /**
  * Events sent from code. Link clicks are tracked by Umami itself through data-umami-event
- * attributes: "open-link" (Dock, Contact) and "switch-view" (ViewSwitch).
+ * attributes: "open-link" (Dock, Contact, Projects) and "switch-view" (ViewSwitch).
  */
 export type AnalyticsEvent =
   | "open-app"

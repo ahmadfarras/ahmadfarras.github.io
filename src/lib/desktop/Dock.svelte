@@ -117,19 +117,19 @@
     backdrop-filter: blur(18px) saturate(1.6);
     -webkit-backdrop-filter: blur(18px) saturate(1.6);
   }
-  /* Eight icons plus the separator have to fit a 375px-wide phone. */
-  @media (max-width: 639px) {
-    .dock {
-      --tile: 2.25rem;
-    }
-    .items {
-      gap: 0.3125rem;
-    }
-  }
   .items {
     display: flex;
     align-items: flex-end;
     gap: 0.5rem;
+  }
+  /* Nine icons plus the separator have to fit a 375px-wide phone. Kept below .items so the gap wins. */
+  @media (max-width: 639px) {
+    .dock {
+      --tile: 2rem;
+    }
+    .items {
+      gap: 0.3125rem;
+    }
   }
   .dock-item {
     position: relative;
