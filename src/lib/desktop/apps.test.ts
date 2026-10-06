@@ -14,6 +14,10 @@ describe("apps", () => {
     }
   });
 
+  it("has a Projects folder", () => {
+    expect(windowAppsById.get("projects")?.title).toBe("Projects");
+  });
+
   it.each(["tetris", "snake"])("includes %s in the Games folder", (id) => {
     expect(windowAppsById.get(id)?.folder).toBe("games");
   });

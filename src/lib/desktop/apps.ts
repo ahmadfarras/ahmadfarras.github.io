@@ -2,6 +2,7 @@ import type { ComponentType } from "svelte";
 import {
   BriefcaseSolid,
   CodeOutline,
+  FolderSolid,
   GithubSolid,
   LinkedinSolid,
   ImageSolid,
@@ -12,6 +13,7 @@ import About from "./apps/About.svelte";
 import Contact from "./apps/Contact.svelte";
 import Experience from "./apps/Experience.svelte";
 import GamesFolder from "./apps/GamesFolder.svelte";
+import ProjectsFolder from "./apps/ProjectsFolder.svelte";
 import Stack from "./apps/Stack.svelte";
 import WallpaperPicker from "./apps/WallpaperPicker.svelte";
 import GamepadIcon from "$lib/components/GamepadIcon.svelte";
@@ -60,6 +62,14 @@ export const apps: DesktopApp[] = [
     icon: BriefcaseSolid,
     content: Experience,
     size: { width: 640, height: 560 }
+  },
+  {
+    kind: "window",
+    id: "projects",
+    title: "Projects",
+    icon: FolderSolid,
+    content: ProjectsFolder,
+    size: { width: 480, height: 300 }
   },
   {
     kind: "window",
